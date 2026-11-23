@@ -1,0 +1,15 @@
+# DESIGN.md — SunnyDent (@sunnydent.rd)
+
+Este proyecto fue generado por **AutoWeb** siguiendo estrictamente `DESIGN_RULES.md` y las referencias de `clinics-health`.
+
+## Reglas Aplicadas
+1. **Cero cuadrículas de tarjetas genéricas:** Especialidades en índice editorial numerado interactivo (`01`–`04`), comparador deslizante Antes/Después, retrato editorial del especialista y mosaico asimétrico.
+2. **Cada sección tiene un fondo y composición diferente:**
+   - Hero: `#F9F7F5` (Split 55/45 asimétrico)
+   - Respaldo/Seguros RD: `#FFFFFF` (Marquee continuo)
+   - Especialidades: `#121417` (Lista numerada + fotografía sticky)
+   - Transformación Antes/Después: `#F0EAE4` (Comparador interactivo + casos)
+   - Especialista: `#F9F7F5` (Retrato editorial + credenciales)
+   - Instalaciones y Proceso: `#FFFFFF` (Mosaico 3 fotos + línea de 4 etapas)
+   - Ubicación en Santo Domingo y FAQ: `#121417` (Mapa interactivo + acordeón)
+3. **Contraste WCAG AA verificado matemáticamente.**

@@ -1,192 +1,107 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
   X,
-  ArrowRight,
-  Phone,
+  ArrowUpRight,
   MapPin,
-  Instagram,
-  Clock,
-  Sparkles,
+  Phone,
   ShieldCheck,
-  ChevronLeft,
-  ChevronRight
+  Sliders
 } from 'lucide-react';
 import {
   EditorialSurface,
   RevealText,
   ClipRevealImage,
   MagneticButton,
-  HoverPreviewList,
-  StickyEditorialSplit,
-  HorizontalShowcase,
-  EditorialMarquee,
-  ScrollProgressBar,
-  CounterMetric
+  ScrollProgressBar
 } from './craft';
 
-// Verified Services & Disciplines
-const DISCIPLINAS = [
-  {
-    number: '01',
-    title: 'Diseño de Sonrisa & Carillas',
-    meta: 'Resina compuesta & disilicato',
-    description: 'Perfeccionamiento armónico conservando la esencia natural de tus dientes.',
-    photo: './media/post_20.jpg',
-    href: 'https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20informaci%C3%B3n%20sobre%20Dise%C3%B1o%20de%20Sonrisa'
-  },
-  {
-    number: '02',
-    title: 'Medicina Estética & Armonización',
-    meta: 'Toxina HUTOX & revitalización',
-    description: 'Protocolos médicos personalizados para suavizar líneas y perfilar con naturalidad.',
-    photo: './media/post_28.jpg',
-    href: 'https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20informaci%C3%B3n%20sobre%20Medicina%20Est%C3%A9tica'
-  },
-  {
-    number: '03',
-    title: 'Rehabilitación Protésica',
-    meta: 'Maryland, coronas & implantes',
-    description: 'Reposición precisa con escaneo intraoral y cerámicas de alta durabilidad.',
-    photo: './media/post_24.jpg',
-    href: 'https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20informaci%C3%B3n%20sobre%20Rehabilitaci%C3%B3n%20Prot%C3%A9sica'
-  },
-  {
-    number: '04',
-    title: 'HydraLips & Terapias Celulares',
-    meta: 'Exosomas, PDRN & hidratación',
-    description: 'Hidratación profunda de labios y bioestimulación con exosomas y Dermapen.',
-    photo: './media/post_15.jpg',
-    href: 'https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20informaci%C3%B3n%20sobre%20HydraLips'
-  }
-];
+const WHATSAPP_URL = "https://wa.me/8099016135?text=Hola%2C%20vi%20el%20portafolio%20web%20de%20SunnyDent%20y%20me%20gustar%C3%ADa%20conversar%20sobre%20un%20proyecto.";
+const INSTAGRAM_URL = "https://www.instagram.com/sunnydent.rd/";
 
-// Verified Case Gallery Items
-const CASOS_GALERIA = [
-  {
-    id: 'caso-1',
-    title: 'Carillas en resina estética',
-    meta: 'Armonía y balance dental',
-    photo: './media/post_20.jpg'
-  },
-  {
-    id: 'caso-2',
-    title: 'Transformación de sonrisa',
-    meta: 'Caso clínico integral',
-    photo: './media/post_35.jpg'
-  },
-  {
-    id: 'caso-3',
-    title: 'HydraLips e hidratación',
-    meta: 'Perfilado y brillo natural',
-    photo: './media/post_1.jpg'
-  },
-  {
-    id: 'caso-4',
-    title: 'Sonrisa en disilicato',
-    meta: 'Resultado final de alta gama',
-    photo: './media/post_27.jpg'
-  },
-  {
-    id: 'caso-5',
-    title: 'Armonización labial sutil',
-    meta: 'Micro-perfilado estético',
-    photo: './media/post_16.jpg'
-  },
-  {
-    id: 'caso-6',
-    title: 'Planificación digital',
-    meta: 'Escaneo y precisión clínica',
-    photo: './media/post_23.jpg'
-  }
-];
-
-// Verified Insurance Logos
-const SEGUROS_ARS = [
-  { name: 'ARS Banreservas', src: './logos-seguros/ars_seguros_banreservas.d729df7.png' },
-  { name: 'ARS Primera Humano', src: './logos-seguros/Logohumano2016.webp' },
-  { name: 'Mapfre Salud', src: './logos-seguros/Mapfre_Logo_2026-s1280.png' },
-  { name: 'Seguros Universal', src: './logos-seguros/logo-seguros-universal.svg' },
-  { name: 'Worldwide Medical', src: './logos-seguros/Worldwide Medical.png' },
-  { name: 'BMI Seguros', src: './logos-seguros/logos-bmi-ecuador-02.png' }
-];
-
-// Interactive Before & After Slider (The Moment)
-function InteractiveBeforeAfter() {
-  const [sliderPos, setSliderPos] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
+/* ==========================================================================
+   MOMENTO FIRMA (THE MOMENT): CURSOR DE BARRIDO SUAVE BEFORE / AFTER
+   Transición interactiva verificada: post_21.jpg (Antes) vs post_22.jpg (Después)
+   ========================================================================== */
+function SmileCompareSlider() {
+  const [position, setPosition] = useState(50);
   const containerRef = useRef(null);
+  const isDragging = useRef(false);
 
-  const handleMove = useCallback((clientX) => {
+  const updatePosition = useCallback((clientX) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
-    const pos = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSliderPos(pos);
+    const clamped = Math.max(0, Math.min(rect.width, x));
+    const percentage = (clamped / rect.width) * 100;
+    setPosition(percentage);
   }, []);
 
   const handlePointerDown = (e) => {
-    setIsDragging(true);
-    handleMove(e.clientX);
+    isDragging.current = true;
+    updatePosition(e.clientX);
   };
 
-  const handlePointerMove = (e) => {
-    if (!isDragging) return;
-    handleMove(e.clientX);
-  };
+  useEffect(() => {
+    const handlePointerMove = (e) => {
+      if (!isDragging.current) return;
+      updatePosition(e.clientX);
+    };
 
-  const handlePointerUp = () => {
-    setIsDragging(false);
-  };
+    const handlePointerUp = () => {
+      isDragging.current = false;
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [updatePosition]);
 
   return (
-    <div
-      ref={containerRef}
-      className="ba-container"
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      style={{ cursor: isDragging ? 'ew-resize' : 'default' }}
-      aria-label="Comparativa interactiva de caso clínico de implante y corona estética"
-      role="region"
-    >
-      <div className="ba-viewport">
-        {/* After Image (Full background) */}
-        <img
-          src="./media/post_22.jpg"
-          alt="Después: Corona definitiva instalada por el Dr. Yomari Landrón"
-          className="ba-image ba-image--after"
-        />
+    <div className="moment-wrapper">
+      <div
+        ref={containerRef}
+        className="compare-container"
+        onPointerDown={handlePointerDown}
+      >
+        {/* Capa Resultado (Después: post_22.jpg) */}
+        <div className="compare-layer-after">
+          <img
+            src="./media/post_22.jpg"
+            alt="Resultado final de diseño y rehabilitación dental — SunnyDent"
+            loading="lazy"
+          />
+          <span className="compare-tag compare-tag--after">Después</span>
+        </div>
 
-        {/* Before Image (Clipped overlay) */}
+        {/* Capa Inicial (Antes: post_21.jpg con clip) */}
         <div
-          className="ba-image ba-image--before"
-          style={{
-            clipPath: `inset(0 ${100 - sliderPos}% 0 0)`
-          }}
+          className="compare-layer-before"
+          style={{ width: `${position}%` }}
         >
           <img
             src="./media/post_21.jpg"
-            alt="Antes: Pilar de implante intraoral preparado"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            alt="Fase inicial previa de rehabilitación dental — SunnyDent"
+            loading="lazy"
+            style={{ width: containerRef.current ? `${containerRef.current.clientWidth}px` : '100%', maxWidth: 'none' }}
           />
+          <span className="compare-tag compare-tag--before">Antes</span>
         </div>
 
-        {/* Tactile Divider Bar */}
+        {/* Línea divisoria y tirador suave */}
         <div
-          className="ba-divider"
-          style={{ left: `${sliderPos}%` }}
+          className="compare-divider-line"
+          style={{ left: `${position}%` }}
         >
-          <div className="ba-handle" aria-hidden="true">
-            <ChevronLeft size={14} strokeWidth={2.5} style={{ marginRight: -2 }} />
-            <ChevronRight size={14} strokeWidth={2.5} style={{ marginLeft: -2 }} />
+          <div className="compare-handle-knob" aria-hidden="true">
+            <Sliders size={18} strokeWidth={1.8} />
           </div>
         </div>
-
-        {/* Minimal Tags */}
-        <span className="ba-tag ba-tag--left">Antes · Implante</span>
-        <span className="ba-tag ba-tag--right">Después · Corona Final</span>
       </div>
     </div>
   );
@@ -195,597 +110,516 @@ function InteractiveBeforeAfter() {
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  // Cerrar menú móvil al cambiar tamaño de pantalla
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 900) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <>
-      {/* 2px Hairline Scroll Indicator */}
+    <div className="app-root">
+      {/* Barra de progreso de lectura ultra-fina de 2px */}
       <ScrollProgressBar color="var(--accent)" />
 
-      {/* Sticky Editorial Navbar */}
+      {/* ====================================================================
+          HEADER: NAVBAR FLOTANTE CON GLASSMORPHISM Y LOGO OFICIAL INTACTO
+          ==================================================================== */}
       <header className="site-header">
-        <div className="site-container site-header__inner">
-          <a href="#inicio" className="site-brand" onClick={closeMobileMenu}>
-            <img
-              src="./media/logo_clean.png"
-              alt="SunnyDent Logo"
-              className="site-brand__logo"
-            />
-            <div className="site-brand__text">
-              <span className="site-brand__name">SunnyDent</span>
-              <span className="site-brand__sub">Mirador Sur · SD</span>
+        <nav className="navbar-pill">
+          {/* Logo oficial intacto con su fondo original #A97D58 */}
+          <a href="#hero" className="navbar-brand">
+            <div className="brand-emblem">
+              <img
+                src="./media/logo_real.jpg"
+                alt="Logo oficial SunnyDent"
+              />
+            </div>
+            <div className="brand-text">
+              <span className="brand-title">SunnyDent</span>
+              <span className="brand-subtitle">Clínica & Estética</span>
             </div>
           </a>
 
-          {/* Clean Desktop Navigation Links */}
-          <nav className="site-nav" aria-label="Navegación principal">
-            <a href="#especialidades" className="site-nav__link craft-link-underline">
-              Especialidades
-            </a>
-            <a href="#comparativa" className="site-nav__link craft-link-underline">
-              Comparativa
-            </a>
-            <a href="#casos" className="site-nav__link craft-link-underline">
-              Casos Reales
-            </a>
-            <a href="#clinica" className="site-nav__link craft-link-underline">
-              La Clínica
-            </a>
-            <a href="#contacto" className="site-nav__link craft-link-underline">
-              Contacto
-            </a>
-          </nav>
+          {/* Enlaces Desktop */}
+          <div className="navbar-links">
+            <a href="#especialidades" className="navbar-link">Especialidades</a>
+            <a href="#casos-reales" className="navbar-link">Casos Reales</a>
+            <a href="#equipo" className="navbar-link">Especialistas</a>
+            <a href="#seguros" className="navbar-link">Seguros ARS</a>
+            <a href="#ubicacion" className="navbar-link">Visítanos</a>
+          </div>
 
-          <div className="site-header__actions">
-            <MagneticButton
-              variant="primary"
-              href="https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20agendar%20una%20evaluaci%C3%B3n"
+          {/* Acciones */}
+          <div className="navbar-actions">
+            <a
+              href={WHATSAPP_URL}
               target="_blank"
-              style={{ fontSize: '0.88rem', padding: '12px 24px' }}
+              rel="noopener noreferrer"
+              className="btn-pill-cta desktop-only"
             >
-              Agendar cita
-            </MagneticButton>
+              <span>Agendar cita</span>
+              <ArrowUpRight size={15} strokeWidth={2} />
+            </a>
 
-            {/* Accessible Hamburger Menu Button */}
             <button
               type="button"
-              className="site-menu-btn"
+              className="nav-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-              aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
-        </div>
+        </nav>
 
-        {/* Mobile Dropdown Panel */}
-        {mobileMenuOpen && (
-          <div className="mobile-nav-panel">
-            <a href="#especialidades" onClick={closeMobileMenu}>
-              Especialidades
-            </a>
-            <a href="#comparativa" onClick={closeMobileMenu}>
-              Comparativa
-            </a>
-            <a href="#casos" onClick={closeMobileMenu}>
-              Casos Reales
-            </a>
-            <a href="#clinica" onClick={closeMobileMenu}>
-              La Clínica
-            </a>
-            <a href="#contacto" onClick={closeMobileMenu}>
-              Contacto
-            </a>
-            <div style={{ marginTop: '0.75rem' }}>
-              <MagneticButton
-                variant="primary"
-                href="https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20agendar%20una%20evaluaci%C3%B3n"
-                target="_blank"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={closeMobileMenu}
-              >
-                Agendar por WhatsApp
-              </MagneticButton>
-            </div>
-          </div>
-        )}
+        {/* Menú móvil limpio */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              className="mobile-nav-panel"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+            >
+              <ul className="mobile-nav-list">
+                <li>
+                  <a
+                    href="#especialidades"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Especialidades</span>
+                    <ArrowUpRight size={18} />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#casos-reales"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Casos Reales</span>
+                    <ArrowUpRight size={18} />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#equipo"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Especialistas</span>
+                    <ArrowUpRight size={18} />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#seguros"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Seguros ARS</span>
+                    <ArrowUpRight size={18} />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#ubicacion"
+                    className="mobile-nav-link"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Visítanos</span>
+                    <ArrowUpRight size={18} />
+                  </a>
+                </li>
+              </ul>
+              <div style={{ marginTop: 20 }}>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-editorial-primary"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Agendar cita
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main>
-        {/* =================================================================
-            1. HERO: Center-Stage Minimal Archetype
-            ================================================================= */}
-        <EditorialSurface
-          as="section"
-          id="inicio"
-          variant="ambient"
-          tone="primary"
-          className="section-padding--tight"
-        >
-          <div className="site-container" style={{ textAlign: 'center' }}>
-            <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-              {/* Monumental Hero Headline (6 words max, sentence case, display weight 400) */}
-              <RevealText
-                as="h1"
-                immediate
-                className="display-title"
-                style={{ margin: '0 auto' }}
-              >
-                Diseño de sonrisa sutil y elegante
-              </RevealText>
+        {/* ==================================================================
+            1. HERO: PORTADA SPLIT IMMERSIVE FRAME (55/45)
+            Superficie: EditorialSurface variant="ambient" tone="primary"
+            ================================================================== */}
+        <EditorialSurface variant="ambient" tone="primary" id="hero" className="hero-section">
+          <div className="editorial-container">
+            <div className="hero-split-grid">
+              {/* Columna Izquierda: Tipografía Serif Monumental */}
+              <div className="hero-content">
 
-              {/* Subtitle: 1 short sentence (<= 12 words) */}
-              <p
-                className="section-subtitle hero-subtitle"
-                style={{ margin: '1.25rem auto 2.5rem', textAlign: 'center' }}
-              >
-                Clínica dental de alta gama en Mirador Sur, Santo Domingo.
-              </p>
-
-              {/* Action Buttons */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
-                }}
-              >
-                <MagneticButton
-                  variant="primary"
-                  href="https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20agendar%20una%20evaluaci%C3%B3n"
-                  target="_blank"
-                >
-                  Agendar cita
-                </MagneticButton>
-                <MagneticButton variant="secondary" href="#casos">
-                  Ver casos
-                </MagneticButton>
-              </div>
-            </div>
-
-            {/* Framed Panoramic Hero Image */}
-            <div
-              style={{
-                marginTop: 'clamp(2.5rem, 5vw, 4.5rem)',
-                maxWidth: '1120px',
-                marginInline: 'auto'
-              }}
-            >
-              <ClipRevealImage
-                src="./media/ai_hero.webp"
-                alt="Instalaciones clínicas SunnyDent Mirador Sur"
-                aspectRatio="16 / 9"
-                parallax
-                priority
-                radius="var(--radius-media)"
-              />
-            </div>
-          </div>
-        </EditorialSurface>
-
-        {/* =================================================================
-            2. ESPECIALIDADES: Anti-Card Editorial List
-            ================================================================= */}
-        <EditorialSurface
-          as="section"
-          id="especialidades"
-          variant="grain"
-          tone="secondary"
-          className="section-padding"
-        >
-          <div className="site-container">
-            <div className="section-header section-header--split">
-              <div>
-                <RevealText as="h2" className="section-title">
-                  Especialidades clínicas
+                <RevealText as="h1" immediate className="h1-monumental">
+                  Resultados sutiles y elegantes
                 </RevealText>
-                <p className="section-subtitle">
-                  Odontología de alta precisión y protocolos estéticos avanzados.
+
+                <p className="sub-lead">
+                  Clínica dental boutique y medicina estética en Mirador Sur, Santo Domingo.
                 </p>
+
+                <div className="hero-actions">
+                  <MagneticButton
+                    variant="primary"
+                    href={WHATSAPP_URL}
+                    target="_blank"
+                    className="btn-editorial-primary"
+                  >
+                    <span>Agendar cita</span>
+                    <ArrowUpRight size={18} />
+                  </MagneticButton>
+
+                  <a href="#especialidades" className="btn-editorial-ghost">
+                    Ver especialidades
+                  </a>
+                </div>
               </div>
-              <MagneticButton
-                variant="secondary"
-                href="https://wa.me/18099016135?text=Hola%20SunnyDent,%20quisiera%20consultar%20sobre%20sus%20tratamientos"
-                target="_blank"
-              >
-                Consultar protocolo
-              </MagneticButton>
-            </div>
 
-            {/* HoverPreviewList replaces generic card grids */}
-            <HoverPreviewList items={DISCIPLINAS} aspectRatio="4 / 5" />
+              {/* Columna Derecha: Fotografía Protagonista ai_hero.webp */}
+              <div className="hero-visual-frame">
+                <ClipRevealImage
+                  src="./media/ai_hero.webp"
+                  alt="Espacio sereno y cálido de SunnyDent en Mirador Sur"
+                  aspectRatio="4 / 3.4"
+                  parallax
+                  priority
+                />
+              </div>
+            </div>
           </div>
         </EditorialSurface>
 
-        {/* =================================================================
-            3. THE MOMENT: Comparativa Táctil de Casos Reales
-            ================================================================= */}
-        <EditorialSurface
-          as="section"
-          id="comparativa"
-          variant="contrast"
-          tone="contrast"
-          className="section-padding"
-        >
-          <div className="site-container">
-            <div className="section-header" style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 3rem' }}>
-              <RevealText as="h2" className="section-title">
-                Precisión clínica documentada
+        {/* ==================================================================
+            2. NUESTRAS ESPECIALIDADES
+            Superficie: EditorialSurface variant="grain" tone="secondary"
+            Geometría: Grid de 3 columnas asimétricas con tarjetas ultra-redondeadas
+            ================================================================== */}
+        <EditorialSurface variant="grain" tone="secondary" id="especialidades" className="section-spacing">
+          <div className="editorial-container">
+            <div className="section-head-editorial">
+              <RevealText as="h2" className="h2-monumental">
+                Especialidades
               </RevealText>
-              <p
-                className="section-subtitle"
-                style={{ color: 'var(--accent-soft)', margin: '0.85rem auto 0' }}
-              >
-                Casos reales y rehabilitación estética por el Dr. Yomari Landrón.
-              </p>
             </div>
 
-            {/* Interactive Tactile Before/After Slider */}
-            <InteractiveBeforeAfter />
+            <div className="specialties-grid">
+              {/* Estética Dental (ai_service_1.webp) */}
+              <article className="specialty-card specialty-card--lead">
+                <div className="specialty-card__media">
+                  <img src="./media/ai_service_1.webp" alt="Diseño de sonrisa en resina estética" loading="lazy" />
+                </div>
+                <div className="specialty-card__body">
+                  <h3 className="specialty-card__title">Estética dental</h3>
+                  <p className="specialty-card__desc">Carillas de resina y blanqueamiento.</p>
+                </div>
+              </article>
 
-            {/* Case Annotation */}
-            <div
-              style={{
-                marginTop: '1.75rem',
-                textAlign: 'center',
-                fontSize: '0.86rem',
-                color: 'var(--accent-soft)',
-                opacity: 0.8
-              }}
-            >
-              Rehabilitación protésica: Colocación de implante vs. Corona definitiva instalada
+              {/* Medicina Estética (post_28.jpg) */}
+              <article className="specialty-card specialty-card--offset">
+                <div className="specialty-card__media">
+                  <img src="./media/post_28.jpg" alt="Toxina botulínica HUTOX y materiales de medicina estética" loading="lazy" />
+                </div>
+                <div className="specialty-card__body">
+                  <h3 className="specialty-card__title">Medicina estética</h3>
+                  <p className="specialty-card__desc">Toxina HUTOX, exosomas y enzimas.</p>
+                </div>
+              </article>
+
+              {/* Odontopediatría (solo tipografía: sin foto verificada Nivel A/B) */}
+              <article className="specialty-card specialty-card--type">
+                <h3 className="specialty-card__title">Odontopediatría</h3>
+                <p className="specialty-card__desc">Cuidado dental cálido para los más pequeños.</p>
+              </article>
             </div>
           </div>
         </EditorialSurface>
 
-        {/* =================================================================
-            4. GALERÍA HORIZONTAL DE CASOS REALES
-            ================================================================= */}
-        <EditorialSurface
-          as="section"
-          id="casos"
-          variant="ambient"
-          tone="primary"
-          className="section-padding"
-        >
-          <div className="site-container">
-            <HorizontalShowcase
-              header={
-                <div>
-                  <RevealText as="h2" className="section-title">
-                    Casos clínicos seleccionados
-                  </RevealText>
-                  <p className="section-subtitle">
-                    Resultados auténticos documentados en consulta en Santo Domingo.
+        {/* ==================================================================
+            3. TRANSFORMACIONES REALES: THE MOMENT (BEFORE / AFTER INTERACTIVO)
+            Superficie: EditorialSurface variant="mesh" tone="primary"
+            Geometría: Contenedor ancho completo con slider de comparación central
+            ================================================================== */}
+        <EditorialSurface variant="mesh" tone="primary" id="casos-reales" className="section-spacing">
+          <div className="editorial-container">
+            <div className="section-head-editorial" style={{ textAlign: 'center', alignItems: 'center' }}>
+              <RevealText as="h2" className="h2-monumental">
+                Casos reales
+              </RevealText>
+            </div>
+
+            {/* Slider firma Before/After */}
+            <SmileCompareSlider />
+          </div>
+        </EditorialSurface>
+
+        {/* ==================================================================
+            4. EXCELENCIA PROFESIONAL: MOSAICO EDITORIAL DE DOCTORES
+            Superficie: EditorialSurface variant="architectural" tone="secondary"
+            Contenido verificado: Dra. Yomari Landrón, Dr. Roberto Reinoso, Dra. Liliana Rubiera
+            ================================================================== */}
+        <EditorialSurface variant="architectural" tone="secondary" id="equipo" className="section-spacing">
+          <div className="editorial-container">
+            <div className="section-head-editorial">
+              <RevealText as="h2" className="h2-monumental">
+                Excelencia clínica
+              </RevealText>
+            </div>
+
+            <div className="team-editorial-mosaic">
+              {/* Perfil 1: Dra. Yomari Landrón (post_30.jpg) */}
+              <article className="doctor-profile-card">
+                <div className="doctor-profile-frame">
+                  <img
+                    src="./media/post_30.jpg"
+                    alt="Dra. Yomari Landrón — Odontóloga en SunnyDent"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="doctor-profile-body">
+                  <span className="doctor-specialty">Odontóloga</span>
+                  <h3 className="doctor-name">Dra. Yomari Landrón</h3>
+                  <p className="doctor-bio-brief">
+                    Diseño de sonrisa y atención personalizada.
                   </p>
                 </div>
-              }
-              items={CASOS_GALERIA}
-              renderItem={(caso) => (
-                <div
-                  className="case-card"
-                  style={{
-                    width: '320px',
-                    borderRadius: 'var(--radius-media)',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <ClipRevealImage
-                    src={caso.photo}
-                    alt={caso.title}
-                    aspectRatio="4 / 5"
-                    radius="var(--radius-media)"
+              </article>
+
+              {/* Perfil 2: Dr. Roberto Reinoso (post_31.jpg) */}
+              <article className="doctor-profile-card">
+                <div className="doctor-profile-frame">
+                  <img
+                    src="./media/post_31.jpg"
+                    alt="Dr. Roberto Reinoso — Rehabilitación y estética dental"
+                    loading="lazy"
                   />
-                  <div style={{ marginTop: '0.85rem' }}>
-                    <div
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '1.25rem',
-                        fontWeight: 500,
-                        lineHeight: 1.2
-                      }}
-                    >
-                      {caso.title}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '0.84rem',
-                        color: 'var(--text-muted)',
-                        marginTop: '0.25rem'
-                      }}
-                    >
-                      {caso.meta}
-                    </div>
-                  </div>
                 </div>
-              )}
-            />
+                <div className="doctor-profile-body">
+                  <span className="doctor-specialty">Rehabilitación y estética</span>
+                  <h3 className="doctor-name">Dr. Roberto Reinoso</h3>
+                  <p className="doctor-bio-brief">
+                    Rehabilitación oral y estética dental.
+                  </p>
+                </div>
+              </article>
+
+              {/* Franja complementaria de equipo (Dra. Liliana Rubiera) */}
+              <div className="team-complement-bar">
+                <div>
+                  <h4 className="team-complement-title">Dra. Liliana Rubiera</h4>
+                  <p className="team-complement-desc">
+                    Odontopediatría
+                  </p>
+                </div>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-editorial-ghost"
+                  style={{ padding: '10px 20px', fontSize: '0.86rem' }}
+                >
+                  Consultar cita
+                </a>
+              </div>
+            </div>
           </div>
         </EditorialSurface>
 
-        {/* =================================================================
-            5. DIRECCIÓN MÉDICA, SEDE & SEGUROS ARS
-            ================================================================= */}
-        <EditorialSurface
-          as="section"
-          id="clinica"
-          variant="grain"
-          tone="secondary"
-          className="section-padding"
-        >
-          <div className="site-container">
-            <StickyEditorialSplit
-              ratio="55/45"
-              pinned={
-                <ClipRevealImage
-                  src="./media/post_4.jpg"
-                  alt="Instalación y precisión de prótesis en SunnyDent"
-                  aspectRatio="4 / 5"
-                  parallax
-                  radius="var(--radius-media)"
+        {/* ==================================================================
+            5. SEGUROS MÉDICOS (ARS VERIFICADAS)
+            Superficie: EditorialSurface variant="ambient" tone="primary"
+            Aseguradoras verificadas: SENASA, ARS Primera de Humano, Metasalud,
+            ARS Renacer, Monumental, ARS Reservas
+            ================================================================== */}
+        <EditorialSurface variant="ambient" tone="primary" id="seguros" className="ars-section-strip">
+          <div className="editorial-container">
+            <div className="ars-strip-header">
+              <RevealText as="h2" className="h2-monumental" style={{ fontSize: 'clamp(1.8rem, 3.2vw, 2.8rem)', marginTop: 8 }}>
+                Seguros médicos
+              </RevealText>
+            </div>
+
+            <div className="ars-showcase-row">
+              {/* ARS Primera de Humano (Logo autorizado) */}
+              <div className="ars-logo-item" title="ARS Primera de Humano">
+                <img
+                  src="./logos-seguros/Logohumano2016.webp"
+                  alt="ARS Primera de Humano"
+                  loading="lazy"
                 />
-              }
-            >
-              <div style={{ paddingLeft: 'clamp(0rem, 2vw, 2.5rem)' }}>
-                <RevealText as="h2" className="section-title">
-                  Dirección y filosofía
-                </RevealText>
+              </div>
 
-                <blockquote
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)',
-                    lineHeight: 1.2,
-                    fontWeight: 400,
-                    margin: '1.5rem 0',
-                    letterSpacing: '-0.02em',
-                    color: 'var(--text-primary)'
-                  }}
-                >
-                  "Resultados sutiles y elegantes para transformar vidas devolviendo seguridad y bienestar."
-                </blockquote>
+              {/* SENASA (Logo autorizado) */}
+              <div className="ars-logo-item" title="SENASA">
+                <img
+                  src="./logos-seguros/logo2022.webp"
+                  alt="SENASA"
+                  loading="lazy"
+                />
+              </div>
 
-                <div style={{ fontSize: '0.94rem', color: 'var(--accent)', fontWeight: 500 }}>
-                  Dr. Yomari Landrón · Dirección Médica SunnyDent
+              {/* ARS Reservas (Logo autorizado) */}
+              <div className="ars-logo-item" title="ARS Reservas">
+                <img
+                  src="./logos-seguros/ars_seguros_banreservas.d729df7.png"
+                  alt="ARS Reservas"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Aseguradoras Verificadas Adicionales con Tipografía Editorial Limpia */}
+              <div className="ars-type-item">
+                Metasalud
+              </div>
+
+              <div className="ars-type-item">
+                ARS Renacer
+              </div>
+
+              <div className="ars-type-item">
+                Monumental
+              </div>
+            </div>
+          </div>
+        </EditorialSurface>
+
+        {/* ==================================================================
+            6. VISÍTANOS: SPLIT 60/40 EN SUPERFICIE CONTRAST TIERRA OSCURO
+            Superficie: EditorialSurface variant="contrast" tone="contrast"
+            Ubicación y contacto verificado: Mirador Sur, Santo Domingo
+            ================================================================== */}
+        <EditorialSurface variant="contrast" tone="contrast" id="ubicacion" className="section-spacing">
+          <div className="editorial-container">
+            <div className="location-split-grid">
+              {/* Información y vías de contacto */}
+              <div className="location-info-block">
+                <div>
+                  <RevealText as="h2" className="h2-monumental h2-monumental--contrast" style={{ marginTop: 8 }}>
+                    Visítanos
+                  </RevealText>
                 </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontSize: '0.9rem',
-                    color: 'var(--text-muted)',
-                    marginTop: '0.5rem'
-                  }}
-                >
-                  <MapPin size={16} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                  <span>Calle Leonor Feltz #21, Mirador Sur, Santo Domingo</span>
+                <div className="location-detail-list">
+                  <div className="location-item">
+                    <div className="location-item-icon">
+                      <MapPin size={18} />
+                    </div>
+                    <div className="location-item-text">
+                      <strong>Dirección</strong>
+                      <span>Calle Leonor Feltz #21, Mirador Sur, Santo Domingo</span>
+                    </div>
+                  </div>
+
+                  <div className="location-item">
+                    <div className="location-item-icon">
+                      <Phone size={18} />
+                    </div>
+                    <div className="location-item-text">
+                      <strong>Citas & WhatsApp</strong>
+                      <span>809-901-6135</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Counter Metrics */}
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '1.5rem',
-                    marginTop: '2.5rem'
-                  }}
-                >
-                  <CounterMetric value="3,920+" label="Seguidores en Instagram" />
-                  <CounterMetric value="148" label="Publicaciones y casos" />
-                </div>
-
-                {/* ARS Insurers Strip */}
-                <div
-                  style={{
-                    marginTop: '3rem',
-                    paddingTop: '2rem',
-                    borderTop: '1px solid var(--border-hairline)'
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.78rem',
-                      letterSpacing: '0.06em',
-                      textTransform: 'uppercase',
-                      color: 'var(--text-muted)',
-                      marginBottom: '1rem'
-                    }}
+                <div style={{ marginTop: 8 }}>
+                  <MagneticButton
+                    variant="primary"
+                    href={WHATSAPP_URL}
+                    target="_blank"
+                    className="btn-editorial-primary"
+                    style={{ backgroundColor: 'var(--gold-accent)', color: '#1a1614' }}
                   >
-                    Planes médicos y ARS aceptados
-                  </div>
-
-                  <div className="ars-grid">
-                    {SEGUROS_ARS.map((ars, idx) => (
-                      <div key={idx} className="ars-card" title={ars.name}>
-                        <img src={ars.src} alt={ars.name} loading="lazy" />
-                      </div>
-                    ))}
-                  </div>
+                    <span>Agendar cita</span>
+                    <ArrowUpRight size={18} />
+                  </MagneticButton>
                 </div>
               </div>
-            </StickyEditorialSplit>
-          </div>
-        </EditorialSurface>
 
-        {/* =================================================================
-            6. CIERRE, CONSULTA & FAQS HONESTOS
-            ================================================================= */}
-        <EditorialSurface
-          as="section"
-          id="contacto"
-          variant="mesh"
-          tone="primary"
-          className="section-padding"
-        >
-          {/* Subtle Kinetic Marquee */}
-          <div style={{ marginBottom: '4rem' }}>
-            <EditorialMarquee
-              items={[
-                'Diseño de Sonrisa',
-                'Medicina Estética',
-                'Mirador Sur',
-                'Santo Domingo',
-                'Resina Compuesta',
-                'Disilicato de Litio',
-                'Dr. Yomari Landrón',
-                'Toxina HUTOX',
-                'Exosomas & PDRN'
-              ]}
-              durationSeconds={40}
-            />
-          </div>
+              {/* Tarjeta visual estilizada de la sede */}
+              <div className="location-map-visual">
+                <div className="map-ambient-art" aria-hidden="true" />
+                
+                <div className="map-pin-card">
+                  <h3 className="map-pin-title">SunnyDent</h3>
+                  <p className="map-pin-sub">Calle Leonor Feltz #21 · Mirador Sur</p>
+                </div>
 
-          <div className="site-container" style={{ textAlign: 'center' }}>
-            <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-              <RevealText as="h2" className="section-title">
-                Comienza tu transformación
-              </RevealText>
-              <p
-                className="section-subtitle"
-                style={{ margin: '0.85rem auto 2.5rem', textAlign: 'center' }}
-              >
-                Agenda tu valoración privada y personalizada en Mirador Sur.
-              </p>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
-                }}
-              >
-                <MagneticButton
-                  variant="primary"
-                  href="https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20agendar%20una%20evaluaci%C3%B3n"
-                  target="_blank"
-                >
-                  Agendar por WhatsApp
-                </MagneticButton>
-                <MagneticButton
-                  variant="secondary"
-                  href="https://www.instagram.com/sunnydent.rd/"
-                  target="_blank"
-                >
-                  Instagram oficial
-                </MagneticButton>
+                <div className="map-actions">
+                  <a
+                    href="https://maps.google.com/?q=Calle+Leonor+Feltz+21+Mirador+Sur+Santo+Domingo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-editorial-primary"
+                    style={{ fontSize: '0.86rem', padding: '12px 22px' }}
+                  >
+                    <span>Ver en Google Maps</span>
+                    <ArrowUpRight size={16} />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </EditorialSurface>
       </main>
 
-      {/* =================================================================
-          FOOTER: Minimalist Studio Luxury
-          ================================================================= */}
+      {/* ====================================================================
+          CIERRE & FOOTER A LA MEDIDA: FONDO MARRÓN TIERRA Y MONOGRAMA INTACTO
+          ==================================================================== */}
       <footer className="site-footer">
-        <div className="site-container">
-          <div className="site-footer__grid">
-            <div>
-              <div className="site-footer__brand-title">SunnyDent</div>
-              <p className="site-footer__address">
-                Odontología Especializada & Medicina Estética.
-                <br />
-                Calle Leonor Feltz #21, Mirador Sur, Santo Domingo, R.D.
-              </p>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.25rem',
-                  marginTop: '1.25rem',
-                  fontSize: '0.92rem'
-                }}
-              >
-                <a
-                  href="https://wa.me/18099016135"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="craft-link-underline"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <Phone size={15} /> 809-901-6135
-                </a>
-                <a
-                  href="https://www.instagram.com/sunnydent.rd/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="craft-link-underline"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <Instagram size={15} /> @sunnydent.rd
-                </a>
+        <div className="editorial-container">
+          <div className="footer-inner">
+            {/* Monograma oficial centrado intacto con fondo #A97D58 */}
+            <div className="footer-emblem-large">
+              <img
+                src="./media/logo_real.jpg"
+                alt="Emblema SunnyDent"
+              />
+            </div>
+
+            <div className="footer-brand-title">SunnyDent</div>
+
+            {/* Cita textual verificada del brief */}
+            <blockquote className="footer-quote">
+              "A veces no se trata de transformar, sino de resaltar lo bonito que ya existe."
+            </blockquote>
+
+            <nav className="footer-nav-links" aria-label="Navegación del pie de página">
+              <a href="#hero" className="footer-link">Inicio</a>
+              <a href="#especialidades" className="footer-link">Especialidades</a>
+              <a href="#casos-reales" className="footer-link">Casos Reales</a>
+              <a href="#equipo" className="footer-link">Especialistas</a>
+              <a href="#seguros" className="footer-link">Seguros ARS</a>
+              <a href="#ubicacion" className="footer-link">Ubicación</a>
+              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="footer-link">Instagram</a>
+            </nav>
+
+            <div className="footer-bottom-bar">
+              <div>
+                © {new Date().getFullYear()} SunnyDent. Todos los derechos reservados.
               </div>
-            </div>
-
-            <div>
-              <div className="site-footer__heading">Navegación</div>
-              <ul className="site-footer__links">
-                <li>
-                  <a href="#inicio" className="craft-link-underline">
-                    Inicio
-                  </a>
-                </li>
-                <li>
-                  <a href="#especialidades" className="craft-link-underline">
-                    Especialidades
-                  </a>
-                </li>
-                <li>
-                  <a href="#comparativa" className="craft-link-underline">
-                    Comparativa
-                  </a>
-                </li>
-                <li>
-                  <a href="#casos" className="craft-link-underline">
-                    Casos Reales
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="site-footer__heading">Clínica</div>
-              <ul className="site-footer__links">
-                <li>
-                  <a href="#clinica" className="craft-link-underline">
-                    Dr. Yomari Landrón
-                  </a>
-                </li>
-                <li>
-                  <a href="#clinica" className="craft-link-underline">
-                    Seguros ARS
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://wa.me/18099016135?text=Hola%20SunnyDent,%20deseo%20agendar%20una%20evaluaci%C3%B3n"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="craft-link-underline"
-                  >
-                    Agendar cita
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="site-footer__bottom">
-            <div>© {new Date().getFullYear()} SunnyDent. Todos los derechos reservados.</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem' }}>
-              Santo Domingo · República Dominicana
+              <div>
+                Mirador Sur, Santo Domingo, República Dominicana.
+              </div>
             </div>
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
